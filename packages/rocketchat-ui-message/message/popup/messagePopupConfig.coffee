@@ -70,15 +70,15 @@ Template.messagePopupConfig.helpers
 				exp = new RegExp("#{RegExp.escape filter}", 'i')
 
 				# Get users from messages
-				items = filteredUsersMemory.find({ts: {$exists: true}, username: exp}, {limit: 5, sort: {ts: -1}}).fetch()
+				items = filteredUsersMemory.find({ts: {$exists: true}, name: exp}, {limit: 5, sort: {ts: -1}}).fetch()
 
 				# Get online users
 				if items.length < 5 and filter?.trim() isnt ''
-					messageUsers = _.pluck(items, 'username')
-					Meteor.users.find({$and: [{username: exp}, {username: {$nin: [Meteor.user()?.username].concat(messageUsers)}}]}, {limit: 5 - messageUsers.length}).fetch().forEach (item) ->
+					messageUsers = _.pluck(items, 'name')
+					Meteor.users.find({$and: [{name: exp}, {name: {$nin: [Meteor.user()?.name].concat(messageUsers)}}]}, {limit: 5 - messageUsers.length}).fetch().forEach (item) ->
 						items.push
 							_id: item.username
-							username: item.username
+							username: item.name
 							status: item.status
 							sort: 1
 
@@ -113,6 +113,17 @@ Template.messagePopupConfig.helpers
 				exp = new RegExp("(^|\\s)#{RegExp.escape filter}", 'i')
 				if exp.test(all.username) or exp.test(all.compatibility)
 					items.push all
+
+				here =
+					_id: 'here'
+					username: 'here'
+					system: true
+					name: t 'Notify_active_in_this_room'
+					compatibility: 'channel group'
+					sort: 4
+
+				if exp.test(here.username) or exp.test(here.compatibility)
+					items.push here
 
 				return items
 
